@@ -11,6 +11,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LucidCQRS.Domain", "LucidCQ
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LucidCQRS.Tests", "LucidCQRS.Tests\LucidCQRS.Tests.csproj", "{94CEC94B-5788-41F2-99A1-BE769258BA23}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LucidCQRS.Messaging", "LucidCQRS.Messaging\LucidCQRS.Messaging.csproj", "{26BA50FE-8933-4341-BD93-0BD4A8365F5E}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -33,6 +35,10 @@ Global
 		{94CEC94B-5788-41F2-99A1-BE769258BA23}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{94CEC94B-5788-41F2-99A1-BE769258BA23}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{94CEC94B-5788-41F2-99A1-BE769258BA23}.Release|Any CPU.Build.0 = Release|Any CPU
+		{26BA50FE-8933-4341-BD93-0BD4A8365F5E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{26BA50FE-8933-4341-BD93-0BD4A8365F5E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{26BA50FE-8933-4341-BD93-0BD4A8365F5E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{26BA50FE-8933-4341-BD93-0BD4A8365F5E}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

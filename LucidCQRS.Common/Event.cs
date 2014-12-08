@@ -3,14 +3,13 @@
 namespace LucidCQRS.Common
 {
     [Serializable]
-    public class Event : Message
+    public abstract class Event : Message
     {
-        public readonly Guid AggregateId;
         public int Version;
 
         public Event(Guid aggregateId)
+            : base(aggregateId)
         {
-            AggregateId = aggregateId;
         }
     }
 }

@@ -14,7 +14,7 @@ namespace LucidCQRS.Messaging.Commanding
             handlers = new Dictionary<Type, Action<object>>();
         }
 
-        public void Send<T>(T command) where T : ICommand
+        public void Send<T>(T command) where T : Command
         {
             Action<object> action;
 
@@ -24,7 +24,7 @@ namespace LucidCQRS.Messaging.Commanding
             action.Invoke(command);
         }
 
-        public void RegisterHandler<T>(Action<T> handler) where T : ICommand
+        public void RegisterHandler<T>(Action<T> handler) where T : Command
         {
             Type commandType = typeof(T);
 

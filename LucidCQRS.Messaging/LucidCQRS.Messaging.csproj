@@ -40,7 +40,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Commanding\CommandBus.cs" />
-    <Compile Include="Commanding\ICommand.cs" />
+    <Compile Include="Commanding\Command.cs" />
     <Compile Include="Commanding\ICommandBus.cs" />
     <Compile Include="Commanding\ICommandSubscription.cs" />
     <Compile Include="Eventing\AsyncEventBus.cs" />

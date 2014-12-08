@@ -1,6 +1,15 @@
-﻿namespace LucidCQRS.Common
+﻿using System;
+
+namespace LucidCQRS.Common
 {
-    public interface Message
+    [Serializable]
+    public abstract class Message
     {
+        public readonly Guid AggregateId;
+
+        public Message(Guid aggregateId)
+        {
+            AggregateId = aggregateId;
+        }
     }
 }

@@ -1,8 +1,6 @@
-﻿using LucidCQRS.Common;
-using System;
+﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+using LucidCQRS.Common;
 
 namespace LucidCQRS.Messaging.Eventing
 {

@@ -7,6 +7,6 @@ namespace LucidCQRS.Messaging.Commanding
 {
     public interface ICommandSubscription
     {
-        void RegisterHandler<T>(Action<T> handler) where T : ICommand;
+        void RegisterHandler<T>(Action<T> handler) where T : Command;
     }
 }

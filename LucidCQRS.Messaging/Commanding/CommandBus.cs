@@ -18,7 +18,7 @@ namespace LucidCQRS.Messaging.Commanding
         {
             Action<object> action;
 
-            if (!handlers.TryGetValue(command.GetType(), out action))
+            if (!handlers.TryGetValue(typeof(T), out action))
                 throw new Exception("Could not find handler for given command!");
 
             action.Invoke(command);

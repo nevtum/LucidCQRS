@@ -60,6 +60,7 @@
     <Compile Include="EventStoreTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Accounting\Account.cs" />
+    <Compile Include="EventBusTests.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\LucidCQRS.Common\LucidCQRS.Common.csproj">
@@ -73,6 +74,10 @@
     <ProjectReference Include="..\LucidCQRS.EventStore\LucidCQRS.EventStore.csproj">
       <Project>{0eae2d48-ef6d-42f1-8515-6491ff754198}</Project>
       <Name>LucidCQRS.EventStore</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\LucidCQRS.Messaging\LucidCQRS.Messaging.csproj">
+      <Project>{26ba50fe-8933-4341-bd93-0bd4a8365f5e}</Project>
+      <Name>LucidCQRS.Messaging</Name>
     </ProjectReference>
   </ItemGroup>
   <Choose>

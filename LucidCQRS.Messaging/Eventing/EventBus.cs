@@ -1,4 +1,5 @@
-﻿using System;
+﻿using LucidCQRS.Common;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -7,30 +8,68 @@ namespace LucidCQRS.Messaging.Eventing
 {
     public class EventBus : IEventBus, IEventSubscription
     {
-        #region IEventBus
+        #region Fields
 
-        public void Publish<T>(T domainEvent) where T : Common.Event
+        private IDictionary<Type, EventSubscribers> handlers;
+
+        #endregion
+
+        #region Constructor
+
+        public EventBus()
         {
-            throw new NotImplementedException();
+            handlers = new Dictionary<Type, EventSubscribers>();
         }
 
-        public void Publish<T>(IEnumerable<T> domainEvents) where T : Common.Event
+        #endregion
+
+        #region IEventBus
+
+        public void Publish<T>(T domainEvent) where T : Event
         {
-            throw new NotImplementedException();
+            EventSubscribers subscribers;
+
+            if (!handlers.TryGetValue(typeof(T), out subscribers))
+                throw new Exception("Could not find handlers for given event!");
+
+            subscribers.Invoke(domainEvent);
+        }
+
+        public void Publish<T>(IEnumerable<T> domainEvents) where T : Event
+        {
+            foreach (T domainEvent in domainEvents)
+            {
+                Publish(domainEvent);
+            }
         }
 
         #endregion
 
         #region IEventSubscription
 
-        void IEventSubscription.Subscribe<T>(Action<T> action)
+        public void Subscribe<T>(Action<T> action) where T : Event
         {
-            throw new NotImplementedException();
+            Type eventType = typeof(T);
+
+            EventSubscribers subscribers;
+            if (!handlers.TryGetValue(eventType, out subscribers))
+            {
+                subscribers = new EventSubscribers();
+                handlers[eventType] = subscribers;
+            }
+
+            subscribers.Register(action);
         }
 
-        void IEventSubscription.Unsubscribe<T>(Action<T> action)
+        public void Unsubscribe<T>(Action<T> action) where T : Event
         {
-            throw new NotImplementedException();
+            Type eventType = typeof(T);
+
+            EventSubscribers subscribers;
+            if (!handlers.TryGetValue(eventType, out subscribers))
+                throw new Exception("Subscription does not exist!");
+
+            subscribers.Unregister(action);
         }
 
         #endregion

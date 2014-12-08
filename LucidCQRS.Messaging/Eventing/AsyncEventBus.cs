@@ -30,7 +30,7 @@ namespace LucidCQRS.Messaging.Eventing
             throw new NotImplementedException();
         }
 
-        public void Unsubscribe<T>(Action<T> action) where T : Event
+        public void ReleaseHandlers<T>() where T : Event
         {
             throw new NotImplementedException();
         }

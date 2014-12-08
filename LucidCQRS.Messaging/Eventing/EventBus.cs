@@ -61,15 +61,12 @@ namespace LucidCQRS.Messaging.Eventing
             subscribers.Register(action);
         }
 
-        public void Unsubscribe<T>(Action<T> action) where T : Event
+        public void ReleaseHandlers<T>() where T : Event
         {
-            Type eventType = typeof(T);
+            if (!handlers.ContainsKey(typeof(T)))
+                return;
 
-            EventSubscribers subscribers;
-            if (!handlers.TryGetValue(eventType, out subscribers))
-                throw new Exception("Subscription does not exist!");
-
-            subscribers.Unregister(action);
+            handlers.Remove(typeof(T));
         }
 
         #endregion

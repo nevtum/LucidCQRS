@@ -26,7 +26,7 @@ namespace LucidCQRS.Tests
         }
 
         [TestMethod]
-        public void ShouldTriggerMultipleSubscribersWhenEventIsPublished()
+        public void ShouldTriggerMultipleHandlersWhenEventIsPublished()
         {
             bool triggered1 = false;
             bool triggered2 = false;
@@ -51,7 +51,8 @@ namespace LucidCQRS.Tests
         }
 
         [TestMethod]
-        public void ShouldNotTriggerUnsubscribedHandlerWhenEventIsPublished()
+        [ExpectedException(typeof(Exception))]
+        public void ShouldThrowExceptionWhenEventPublishedAfterHandlersReleased()
         {
             bool triggered = false;
 
@@ -62,31 +63,21 @@ namespace LucidCQRS.Tests
 
             EventBus eventBus = new EventBus();
             eventBus.Subscribe(Handle);
-            eventBus.Unsubscribe(Handle);
+            eventBus.ReleaseHandlers<AccountCreated>();
             eventBus.Publish(new AccountCreated(Guid.NewGuid(), "Test"));
-
-            Assert.AreEqual(false, triggered);
         }
 
-        [TestMethod]
-        [ExpectedException(typeof(Exception))]
-        public void ShouldThrowExceptionWhenAttemptingToSubscribeMoreThanOnce()
-        {
-            Action<AccountCreated> Handle = (e) => { };
+        //// Very difficult to enforce unless each handler wrapped
+        //// in an object with identity.
+        //[TestMethod]
+        //[ExpectedException(typeof(Exception))]
+        //public void ShouldThrowExceptionWhenAttemptingToSubscribeMoreThanOnce()
+        //{
+        //    Action<AccountCreated> Handle = (e) => { };
 
-            IEventSubscription eventBus = new EventBus();
-            eventBus.Subscribe(Handle);
-            eventBus.Subscribe(Handle);
-        }
-
-        [TestMethod]
-        [ExpectedException(typeof(Exception))]
-        public void ShouldThrowExceptionOnUnsubscribeWhenNoSubscriptionsExist()
-        {
-            Action<AccountCreated> Handle = (e) => { };
-
-            IEventSubscription eventBus = new EventBus();
-            eventBus.Unsubscribe(Handle);
-        }
+        //    IEventSubscription eventBus = new EventBus();
+        //    eventBus.Subscribe(Handle);
+        //    eventBus.Subscribe(Handle);
+        //}
     }
 }

@@ -48,6 +48,8 @@
     <Compile Include="Eventing\EventSubscribers.cs" />
     <Compile Include="Eventing\IEventBus.cs" />
     <Compile Include="Eventing\IEventSubscription.cs" />
+    <Compile Include="Exceptions\DuplicateHandlerException.cs" />
+    <Compile Include="Exceptions\HandlerMissingException.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

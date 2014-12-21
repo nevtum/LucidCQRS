@@ -1,6 +1,7 @@
 ﻿using System;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using LucidCQRS.Messaging.Commanding;
+using LucidCQRS.Messaging.Exceptions;
 
 namespace LucidCQRS.Tests
 {
@@ -25,7 +26,21 @@ namespace LucidCQRS.Tests
         }
 
         [TestMethod]
-        [ExpectedException(typeof(Exception))]
+        [ExpectedException(typeof(HandlerMissingException))]
+        public void ShouldThrowExceptionIfMissingHandlerRegistered()
+        {
+            Action<PerformSpecialOperation> Handle1 = delegate { };
+            Action<PerformAnotherOperation> Handle2 = delegate { };
+
+            CommandBus commandBus = new CommandBus();
+            commandBus.RegisterHandler(Handle1);
+
+            commandBus.Send(new PerformSpecialOperation()); // Should pass
+            commandBus.Send(new PerformAnotherOperation()); // Should throw exception
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(DuplicateHandlerException))]
         public void ShouldThrowExceptionWhenSubscribingMultipleHandlersToSameCommand()
         {
             CommandBus commandBus = new CommandBus();
@@ -48,6 +63,15 @@ namespace LucidCQRS.Tests
     public class PerformSpecialOperation : Command
     {
         public PerformSpecialOperation()
+            : base(Guid.NewGuid())
+        {
+        }
+    }
+
+    // Helper class only
+    public class PerformAnotherOperation : Command
+    {
+        public PerformAnotherOperation()
             : base(Guid.NewGuid())
         {
         }

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using LucidCQRS.Messaging.Exceptions;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -13,7 +14,7 @@ namespace LucidCQRS.Messaging.Eventing
         public void Register<T>(Action<T> action)
         {
             if (_delegates.Contains((e) => action((T)e)))
-                throw new Exception("Cannot register same handler more than once!");
+                throw new DuplicateHandlerException("Cannot register same handler more than once!");
 
             _delegates.Add((e) => action((T)e));
         }
@@ -21,7 +22,7 @@ namespace LucidCQRS.Messaging.Eventing
         public void Unregister<T>(Action<T> action)
         {
             if (!_delegates.Contains((e) => action((T)e)))
-                throw new Exception("Handler does not exist to unregister!");
+                throw new HandlerMissingException("Handler does not exist to unregister!");
 
             _delegates.Remove((e) => action((T)e));
         }

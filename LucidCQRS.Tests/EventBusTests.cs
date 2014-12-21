@@ -2,6 +2,7 @@
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using LucidCQRS.Messaging.Eventing;
 using LucidCQRS.Tests.Accounting;
+using LucidCQRS.Messaging.Exceptions;
 
 namespace LucidCQRS.Tests
 {
@@ -51,8 +52,7 @@ namespace LucidCQRS.Tests
         }
 
         [TestMethod]
-        [ExpectedException(typeof(Exception))]
-        public void ShouldThrowExceptionWhenEventPublishedAfterHandlersReleased()
+        public void ShouldNotThrowExceptionWhenEventPublishedAfterHandlersReleased()
         {
             bool triggered = false;
 
@@ -64,6 +64,15 @@ namespace LucidCQRS.Tests
             EventBus eventBus = new EventBus();
             eventBus.Subscribe(Handle);
             eventBus.ReleaseHandlers<AccountCreated>();
+            eventBus.Publish(new AccountCreated(Guid.NewGuid(), "Test"));
+
+            Assert.AreEqual(false, triggered);
+        }
+
+        [TestMethod]
+        public void ShouldNotThrowExceptionIfNoHandlersRegistered()
+        {
+            IEventBus eventBus = new EventBus();
             eventBus.Publish(new AccountCreated(Guid.NewGuid(), "Test"));
         }
 

@@ -28,7 +28,7 @@ namespace LucidCQRS.Messaging.Eventing
             EventSubscribers subscribers;
 
             if (!handlers.TryGetValue(typeof(T), out subscribers))
-                throw new Exception("Could not find handlers for given event!");
+                return;
 
             subscribers.Invoke(domainEvent);
         }

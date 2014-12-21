@@ -1,4 +1,5 @@
-﻿using System;
+﻿using LucidCQRS.Messaging.Exceptions;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -19,7 +20,7 @@ namespace LucidCQRS.Messaging.Commanding
             Action<object> action;
 
             if (!handlers.TryGetValue(typeof(T), out action))
-                throw new Exception("Could not find handler for given command!");
+                throw new HandlerMissingException("Could not find handler for given command!");
 
             action.Invoke(command);
         }
@@ -29,7 +30,7 @@ namespace LucidCQRS.Messaging.Commanding
             Type commandType = typeof(T);
 
             if (handlers.ContainsKey(commandType))
-                throw new Exception("Cannot add more than one command handler!");
+                throw new DuplicateHandlerException("Cannot add more than one command handler!");
 
             handlers[commandType] = (c) =>
             {

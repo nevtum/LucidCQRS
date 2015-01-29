@@ -7,7 +7,7 @@ namespace LucidCQRS.Domain
 {
     public abstract class AggregateRoot
     {
-        private readonly List<Event> _changes = new List<Event>();
+        private readonly List<Event> _newChanges = new List<Event>();
 
         public Guid Id { get; private set; }
 
@@ -18,12 +18,12 @@ namespace LucidCQRS.Domain
 
         public IEnumerable<Event> GetUncommittedChanges()
         {
-            return _changes;
+            return _newChanges;
         }
 
         public void MarkChangesAsCommitted()
         {
-            _changes.Clear();
+            _newChanges.Clear();
         }
 
         public void LoadFromHistory(IEnumerable<Event> history)
@@ -35,7 +35,7 @@ namespace LucidCQRS.Domain
         protected void ApplyNewChange(Event e)
         {
             ApplyChange(e);
-            _changes.Add(e);
+            _newChanges.Add(e);
         }
 
         private void ApplyChange(Event e)

@@ -20,9 +20,16 @@ namespace LucidCQRS.Tests
 
             Assert.AreEqual(3, acc.GetUncommittedChanges().Count());
 
+            IEnumerable<Event> storedEvents = acc.GetUncommittedChanges();
             acc.MarkChangesAsCommitted();
 
             Assert.AreEqual(0, acc.GetUncommittedChanges().Count());
+
+            Account restored = new Account();
+            restored.LoadFromHistory(storedEvents);
+            restored.Deposit(25.10);
+
+            Assert.AreEqual(1, restored.GetUncommittedChanges().Count());
         }
 
         [TestMethod]

@@ -27,7 +27,7 @@ namespace LucidCQRS.Messaging.Eventing
         {
             EventSubscribers subscribers;
 
-            if (!handlers.TryGetValue(typeof(T), out subscribers))
+            if (!handlers.TryGetValue(domainEvent.GetType(), out subscribers))
                 return;
 
             subscribers.Invoke(domainEvent);

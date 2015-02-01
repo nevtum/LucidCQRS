@@ -6,6 +6,7 @@ using LucidCQRS.EventStore;
 using LucidCQRS.Common;
 using LucidCQRS.Tests.Accounting;
 using System.IO;
+using LucidCQRS.Messaging.Eventing;
 
 namespace LucidCQRS.Tests
 {
@@ -41,6 +42,40 @@ namespace LucidCQRS.Tests
                 Assert.AreEqual(originalEvents[i].AggregateId, deserializedEvents[i].AggregateId);
                 Assert.AreEqual(originalEvents[i].Version, deserializedEvents[i].Version);
             }
+        }
+
+        [TestMethod]
+        public void ShouldPublishEventsPreviouslySaved()
+        {
+            EventBus eventBus = new EventBus();
+
+            List<Type> eventsTriggered = new List<Type>();
+
+            eventBus.Subscribe<DepositMade>((e) =>
+            {
+                eventsTriggered.Add(e.GetType());
+            });
+
+            eventBus.Subscribe<WithdrawalMade>((e) =>
+            {
+                eventsTriggered.Add(e.GetType());
+            });
+
+            Guid id = Guid.NewGuid();
+
+            List<Event> originalEvents = new List<Event>();
+            originalEvents.Add(new DepositMade(id, 220.50));
+            originalEvents.Add(new WithdrawalMade(id, 45.25));
+
+            _store.SaveChanges(id, -1, originalEvents);
+
+            foreach (Event ev in _store.GetEventsFor(id))
+                eventBus.Publish(ev);
+
+            Assert.AreEqual(2, eventsTriggered.Count);
+            Assert.AreEqual(true, eventsTriggered.Contains(typeof(DepositMade)));
+            Assert.AreEqual(true, eventsTriggered.Contains(typeof(WithdrawalMade)));
+            Assert.AreEqual(false, eventsTriggered.Contains(typeof(AccountCreated)));
         }
 
         [TestMethod]

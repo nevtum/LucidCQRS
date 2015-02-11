@@ -8,7 +8,8 @@ namespace LucidCQRS.Messaging.Eventing
     {
         #region Fields
 
-        private IDictionary<Type, EventSubscribers> handlers;
+        private IDictionary<Type, EventSubscribers> _handlers;
+        private IList<string> _publishing;
 
         #endregion
 
@@ -16,7 +17,8 @@ namespace LucidCQRS.Messaging.Eventing
 
         public EventBus()
         {
-            handlers = new Dictionary<Type, EventSubscribers>();
+            _handlers = new Dictionary<Type, EventSubscribers>();
+            _publishing = new List<string>();
         }
 
         #endregion
@@ -25,12 +27,14 @@ namespace LucidCQRS.Messaging.Eventing
 
         public void Publish<T>(T domainEvent) where T : Event
         {
-            EventSubscribers subscribers;
+            Type t = domainEvent.GetType();
 
-            if (!handlers.TryGetValue(domainEvent.GetType(), out subscribers))
-                return;
+            if (_publishing.Contains(t.ToString()))
+                throw new Exception("Cannot concurrently publish an event that is currently being published");
 
-            subscribers.Invoke(domainEvent);
+            _publishing.Add(t.ToString());
+            LockedPublish<T>(domainEvent);
+            _publishing.Remove(t.ToString());
         }
 
         public void Publish<T>(IEnumerable<T> domainEvents) where T : Event
@@ -50,10 +54,10 @@ namespace LucidCQRS.Messaging.Eventing
             Type eventType = typeof(T);
 
             EventSubscribers subscribers;
-            if (!handlers.TryGetValue(eventType, out subscribers))
+            if (!_handlers.TryGetValue(eventType, out subscribers))
             {
                 subscribers = new EventSubscribers();
-                handlers[eventType] = subscribers;
+                _handlers[eventType] = subscribers;
             }
 
             subscribers.Register(action);
@@ -61,10 +65,24 @@ namespace LucidCQRS.Messaging.Eventing
 
         public void ReleaseHandlers<T>() where T : Event
         {
-            if (!handlers.ContainsKey(typeof(T)))
+            if (!_handlers.ContainsKey(typeof(T)))
                 return;
 
-            handlers.Remove(typeof(T));
+            _handlers.Remove(typeof(T));
+        }
+
+        #endregion
+
+        #region Private Methods
+
+        private void LockedPublish<T>(T domainEvent) where T : Event
+        {
+            EventSubscribers subscribers;
+
+            if (!_handlers.TryGetValue(domainEvent.GetType(), out subscribers))
+                return;
+
+            subscribers.Invoke(domainEvent);
         }
 
         #endregion

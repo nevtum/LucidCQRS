@@ -76,6 +76,78 @@ namespace LucidCQRS.Tests
             eventBus.Publish(new AccountCreated(Guid.NewGuid(), "Test"));
         }
 
+        [TestMethod]
+        [ExpectedException(typeof(Exception))]
+        public void ShouldThrowExceptionForConcurrentPublishes()
+        {
+            EventBus eventBus = new EventBus();
+
+            Action<DepositMade> Handle = (e) =>
+            {
+                // Calls publish again while handling same event.
+                // Should be prevented by EventBus.
+                eventBus.Publish<DepositMade>(new DepositMade(Guid.NewGuid(), 20));
+            };
+
+            eventBus.Subscribe<DepositMade>(Handle);
+
+            eventBus.Publish<DepositMade>(new DepositMade(Guid.NewGuid(), 40));
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(Exception))]
+        public void ShouldPreventRoundTripConcurrentPublishes()
+        {
+            EventBus eventBus = new EventBus();
+
+            Action<DepositMade> Handle = (e) =>
+            {
+                eventBus.Publish<WithdrawalMade>(new WithdrawalMade(Guid.NewGuid(), 20));
+            };
+
+            Action<WithdrawalMade> Handle2 = (e) =>
+            {
+                eventBus.Publish<DepositMade>(new DepositMade(Guid.NewGuid(), 20));
+            };
+
+            eventBus.Subscribe<DepositMade>(Handle);
+            eventBus.Subscribe<WithdrawalMade>(Handle2);
+
+            eventBus.Publish<DepositMade>(new DepositMade(Guid.NewGuid(), 40));
+        }
+
+        [TestMethod]
+        public void ShouldAllowChainedUnidirectionalConcurrentPublishes()
+        {
+            EventBus eventBus = new EventBus();
+
+            int timesTriggered = 0;
+
+            Action<AccountCreated> Handle = (e) =>
+            {
+                eventBus.Publish<DepositMade>(new DepositMade(e.AggregateId, 20));
+            };
+
+            Action<DepositMade> Handle2 = (e) =>
+            {
+                eventBus.Publish<WithdrawalMade>(new WithdrawalMade(e.AggregateId, 20));
+            };
+
+            Action<WithdrawalMade> Handle3 = (e) =>
+            {
+                timesTriggered++;
+            };
+
+            eventBus.Subscribe<AccountCreated>(Handle);
+            eventBus.Subscribe<DepositMade>(Handle2);
+            eventBus.Subscribe<WithdrawalMade>(Handle3);
+
+            eventBus.Publish<AccountCreated>(new AccountCreated(Guid.NewGuid(), "Test"));
+            Assert.AreEqual(1, timesTriggered);
+            eventBus.Publish<AccountCreated>(new AccountCreated(Guid.NewGuid(), "Test2"));
+            Assert.AreEqual(1, timesTriggered);
+        }
+
         //// Very difficult to enforce unless each handler wrapped
         //// in an object with identity.
         //[TestMethod]

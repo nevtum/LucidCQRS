@@ -9,7 +9,6 @@ namespace LucidCQRS.Messaging.Eventing
         #region Fields
 
         private IDictionary<Type, EventSubscribers> _handlers;
-        private IList<string> _publishing;
 
         #endregion
 
@@ -18,7 +17,6 @@ namespace LucidCQRS.Messaging.Eventing
         public EventBus()
         {
             _handlers = new Dictionary<Type, EventSubscribers>();
-            _publishing = new List<string>();
         }
 
         #endregion
@@ -28,13 +26,12 @@ namespace LucidCQRS.Messaging.Eventing
         public void Publish<T>(T domainEvent) where T : Event
         {
             Type t = domainEvent.GetType();
+            EventSubscribers subscribers;
 
-            if (_publishing.Contains(t.ToString()))
-                throw new Exception("Cannot concurrently publish an event that is currently being published");
+            if (!_handlers.TryGetValue(domainEvent.GetType(), out subscribers))
+                return;
 
-            _publishing.Add(t.ToString());
-            LockedPublish<T>(domainEvent);
-            _publishing.Remove(t.ToString());
+            subscribers.Invoke(domainEvent);
         }
 
         public void Publish<T>(IEnumerable<T> domainEvents) where T : Event
@@ -69,20 +66,6 @@ namespace LucidCQRS.Messaging.Eventing
                 return;
 
             _handlers.Remove(typeof(T));
-        }
-
-        #endregion
-
-        #region Private Methods
-
-        private void LockedPublish<T>(T domainEvent) where T : Event
-        {
-            EventSubscribers subscribers;
-
-            if (!_handlers.TryGetValue(domainEvent.GetType(), out subscribers))
-                return;
-
-            subscribers.Invoke(domainEvent);
         }
 
         #endregion

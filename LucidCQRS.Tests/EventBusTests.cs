@@ -76,11 +76,29 @@ namespace LucidCQRS.Tests
             eventBus.Publish(new AccountCreated(Guid.NewGuid(), "Test"));
         }
 
+        //// Very difficult to enforce unless each handler wrapped
+        //// in an object with identity.
+        //[TestMethod]
+        //[ExpectedException(typeof(Exception))]
+        //public void ShouldThrowExceptionWhenAttemptingToSubscribeMoreThanOnce()
+        //{
+        //    Action<AccountCreated> Handle = (e) => { };
+
+        //    IEventSubscription eventBus = new EventBus();
+        //    eventBus.Subscribe(Handle);
+        //    eventBus.Subscribe(Handle);
+        //}
+    }
+
+    [TestClass]
+    public class ConcurrencyAwareEventBusTests
+    {
         [TestMethod]
         [ExpectedException(typeof(Exception))]
-        public void ShouldThrowExceptionForConcurrentPublishes()
+        public void ShouldPreventRecursivePublishes1()
         {
-            EventBus eventBus = new EventBus();
+            EventBus inner = new EventBus();
+            IEventBus eventBus = new ConcurrencyAwareEventBus(inner);
 
             Action<DepositMade> Handle = (e) =>
             {
@@ -89,16 +107,17 @@ namespace LucidCQRS.Tests
                 eventBus.Publish<DepositMade>(new DepositMade(Guid.NewGuid(), 20));
             };
 
-            eventBus.Subscribe<DepositMade>(Handle);
+            inner.Subscribe<DepositMade>(Handle);
 
             eventBus.Publish<DepositMade>(new DepositMade(Guid.NewGuid(), 40));
         }
 
         [TestMethod]
         [ExpectedException(typeof(Exception))]
-        public void ShouldPreventRoundTripConcurrentPublishes()
+        public void ShouldPreventRecursivePublishes2()
         {
-            EventBus eventBus = new EventBus();
+            EventBus inner = new EventBus();
+            IEventBus eventBus = new ConcurrencyAwareEventBus(inner);
 
             Action<DepositMade> Handle = (e) =>
             {
@@ -110,16 +129,17 @@ namespace LucidCQRS.Tests
                 eventBus.Publish<DepositMade>(new DepositMade(Guid.NewGuid(), 20));
             };
 
-            eventBus.Subscribe<DepositMade>(Handle);
-            eventBus.Subscribe<WithdrawalMade>(Handle2);
+            inner.Subscribe<DepositMade>(Handle);
+            inner.Subscribe<WithdrawalMade>(Handle2);
 
             eventBus.Publish<DepositMade>(new DepositMade(Guid.NewGuid(), 40));
         }
 
         [TestMethod]
-        public void ShouldAllowChainedUnidirectionalConcurrentPublishes()
+        public void ShouldAllowNonRecursivePublishes()
         {
-            EventBus eventBus = new EventBus();
+            EventBus inner = new EventBus();
+            IEventBus eventBus = new ConcurrencyAwareEventBus(inner);
 
             int timesTriggered = 0;
 
@@ -138,27 +158,14 @@ namespace LucidCQRS.Tests
                 timesTriggered++;
             };
 
-            eventBus.Subscribe<AccountCreated>(Handle);
-            eventBus.Subscribe<DepositMade>(Handle2);
-            eventBus.Subscribe<WithdrawalMade>(Handle3);
+            inner.Subscribe<AccountCreated>(Handle);
+            inner.Subscribe<DepositMade>(Handle2);
+            inner.Subscribe<WithdrawalMade>(Handle3);
 
             eventBus.Publish<AccountCreated>(new AccountCreated(Guid.NewGuid(), "Test"));
             Assert.AreEqual(1, timesTriggered);
             eventBus.Publish<AccountCreated>(new AccountCreated(Guid.NewGuid(), "Test2"));
-            Assert.AreEqual(1, timesTriggered);
+            Assert.AreEqual(2, timesTriggered);
         }
-
-        //// Very difficult to enforce unless each handler wrapped
-        //// in an object with identity.
-        //[TestMethod]
-        //[ExpectedException(typeof(Exception))]
-        //public void ShouldThrowExceptionWhenAttemptingToSubscribeMoreThanOnce()
-        //{
-        //    Action<AccountCreated> Handle = (e) => { };
-
-        //    IEventSubscription eventBus = new EventBus();
-        //    eventBus.Subscribe(Handle);
-        //    eventBus.Subscribe(Handle);
-        //}
     }
 }

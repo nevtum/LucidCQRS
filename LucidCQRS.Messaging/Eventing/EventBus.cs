@@ -34,14 +34,6 @@ namespace LucidCQRS.Messaging.Eventing
             subscribers.Invoke(domainEvent);
         }
 
-        public void Publish<T>(IEnumerable<T> domainEvents) where T : Event
-        {
-            foreach (T domainEvent in domainEvents)
-            {
-                Publish(domainEvent);
-            }
-        }
-
         #endregion
 
         #region IEventSubscription

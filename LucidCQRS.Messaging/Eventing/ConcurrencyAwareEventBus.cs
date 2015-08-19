@@ -32,14 +32,6 @@ namespace LucidCQRS.Messaging.Eventing
 
         #region IEventBus
 
-        public void Publish<T>(IEnumerable<T> domainEvents) where T : Event
-        {
-            foreach (T domainEvent in domainEvents)
-            {
-                Publish(domainEvent);
-            }
-        }
-
         public void Publish<T>(T domainEvent) where T : Event
         {
             Type t = domainEvent.GetType();

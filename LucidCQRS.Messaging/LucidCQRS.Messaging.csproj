@@ -43,9 +43,9 @@
     <Compile Include="Commanding\Command.cs" />
     <Compile Include="Commanding\ICommandBus.cs" />
     <Compile Include="Commanding\ICommandSubscription.cs" />
-    <Compile Include="Eventing\AsyncEventBus.cs" />
     <Compile Include="Eventing\EventBus.cs" />
     <Compile Include="Eventing\EventSubscribers.cs" />
+    <Compile Include="Eventing\Extensions\EventBusExtensions.cs" />
     <Compile Include="Eventing\IEventBus.cs" />
     <Compile Include="Eventing\IEventSubscription.cs" />
     <Compile Include="Eventing\ConcurrencyAwareEventBus.cs" />
